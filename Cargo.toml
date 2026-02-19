@@ -17,6 +17,7 @@ leptos_meta = { version = "0.8.6" }
 leptos_actix = { version = "0.8.7", optional = true }
 leptos_router = { version = "0.8.12", features = ["nightly"] }
 wasm-bindgen = "0.2.106"
+phosphor-leptos = "0.8.0"
 
 [features]
 csr = ["leptos/csr"]
