@@ -1,0 +1,29 @@
+name: Workspace Test
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2 # Cache build deps for faster building later.
+      - name: Install build dependencies
+        run: sudo apt-get update -y && sudo apt-get install -y --no-install-recommends build-essential clang pkg-config libssl-dev ca-certificates openssl
+      - name: Install rust nightly toolchain
+        run: rustup toolchain install nightly --profile minimal
+      - name: Fetch binstall binary
+        run: wget https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz
+      - name: Install binstall binary
+        # ? this was changed from `/usr/local/cargo/bin` to hopefully solve this 'No such file or directory' error.
+        run: tar -xvf cargo-binstall-x86_64-unknown-linux-musl.tgz && cp cargo-binstall ~/.cargo/bin
+      - name: Install cargo-leptos
+        run: cargo binstall cargo-leptos -y
+      - name: Run tests
+        run: cargo leptos test --features ssr,hydrate
