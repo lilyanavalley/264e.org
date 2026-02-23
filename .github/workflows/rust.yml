@@ -1,0 +1,43 @@
+name: Make Container
+
+on:
+  push:
+    tags:
+      - v*.*.*
+      - v*.*
+      - v*
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  CAGRO_TERM_COLOR: always
+
+jobs:
+
+  testing:
+    uses: ./.github/workflows/test.yaml
+
+  deploying:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2 # Cache build deps for faster building later.
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6.5.0
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}:latest
+      
